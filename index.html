@@ -3,16 +3,91 @@
   <head>
     <meta charset="UTF-8">
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <title>Hello World!</title>
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css; font-src https://fonts.googleapis.com/icon?family=Material+Icons; script-src 'self' 'unsafe-inline'"> -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src *; font-src *; script-src 'self' 'unsafe-inline'">
+
+    <title>Hello Butthead</title>
+    <link rel="stylesheet" href='./styles.css'>
+    <link rel="stylesheet" href="./photon-0.1.2-dist/css/photon.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+
+    </style>
   </head>
   <body>
-    <h1>Hello World!</h1>
-    We are using Node.js <span id="node-version"></span>,
-    Chromium <span id="chrome-version"></span>,
-    and Electron <span id="electron-version"></span>.
+<div id="everything">
+    <h1 class="changeit brand-logo center">Copy test</h1>
 
+    <ul class="changeit" id="todo">
+
+    </ul>
+
+    <h2 class="changeit center">Clipboard</h1>
+    <div class="switch center">
+      <label>
+        Off
+        <input id = "btn"  type="checkbox" name="button"></input>
+        <span class="lever"></span>
+        On
+      </label>
+    </div>
+
+    <h4 class="changeit center"> Recently Copied: </h4>
+    <ul class= "copied-list collection"id="clipboard">
+
+    </ul>
+    <h4 class="changeit center"> Favorites: </h4>
+    <ul class="collection" id="favorites">
+
+    </ul>
+  </div>
     <!-- You can also require other files to run in this process -->
     <script src="./renderer.js"></script>
+    <script type="text/javascript">
+      window.api.listenForIt();
+      const btn = document.querySelector('#btn');
+      const background = document.querySelector('body');
+
+
+      function changeFontColor(element){
+        element.classList.add('font-engaged');
+      }
+
+      function changeFontColorDark(element){
+        element.classList.remove('font-engaged');
+      }
+
+//Toggle On and Off for CSS
+      btn.addEventListener('click', function() {
+        const text = document.querySelectorAll('.changeit');
+        if(this.checked) {
+          window.api.clipIt();
+          background.style.background = '#2E3E50';
+          text.forEach(item => changeFontColor(item));
+        }else{
+          window.api.turnOffClip();
+          background.style.background = 'white';
+          text.forEach(item => changeFontColorDark(item));
+        }
+        // canListenForCopy == true ? window.api.clipIt() : window.api.turnOffClip();
+        // canListenForCopy = !canListenForCopy;
+      });
+
+      /*
+      1
+      2
+      3
+      4
+      5
+      fart
+      poop
+      pee pee
+      */
+      window.api.loadFavorites();
+      window.api.listenForCopy();
+      window.api.addToFavorites();
+      window.api.deleteRenderFromFavorites();
+    </script>
   </body>
 </html>

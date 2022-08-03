@@ -1,0 +1,11 @@
+Create Collections
+Aggregate last 7 days
+Fuzzy Finder Search (js library or using native array methods)
+Copy Images
+Copy Bookmarks
+
+Create Favorites TODO: Once added to favorites change event listener to
+remove from favorites
+
+Link Up SQL DB DONE
+Add Stars to box DONE

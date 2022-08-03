@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'">
+    <title>Hello Butthead</title>
+  </head>
+  <body>
+    <h1>What would you like to add?</h1>
+
+      <form>
+        <div class="">
+          <label>Enter Item</label>
+          <input type="text" id="item" autofocus>
+        </div>
+        <button type="submit">Add Item</button>
+      </form>
+      <!-- <script src="./renderer.js"></script> -->
+
+    <!-- You can also require other files to run in this process -->
+
+    <script>
+
+      const form = document.querySelector('form');
+      form.addEventListener('submit', submitForm);
+
+      function submitForm(e){
+        e.preventDefault();
+        const item = document.querySelector('#item').value;
+        window.api.submitIt(item);
+        console.log('submitted');
+
+      }
+
+    </script>
+  </body>
+</html>
