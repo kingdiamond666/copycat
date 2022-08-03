@@ -9,38 +9,73 @@
     <title>Hello Butthead</title>
     <link rel="stylesheet" href='./styles.css'>
     <link rel="stylesheet" href="./photon-0.1.2-dist/css/photon.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 
     </style>
   </head>
   <body>
-<div id="everything">
-    <h1 class="changeit brand-logo center">Copy test</h1>
+<div id="everything" class="window">
+<header class="toolbar toolbar-header">
+  <h1 class="changeit title">Copy Cat</h1>
+  <div class="toolbar-actions">
+      <div class="btn-group">
 
-    <ul class="changeit" id="todo">
-
-    </ul>
-
-    <h2 class="changeit center">Clipboard</h1>
-    <div class="switch center">
-      <label>
-        Off
-        <input id = "btn"  type="checkbox" name="button"></input>
-        <span class="lever"></span>
-        On
-      </label>
+        <button id="listen"class="btn btn-default">
+          <span class="icon icon-feather"></span>
+        </button>
+        <button id="faveToggler" class="btn btn-default">
+          <span class="icon icon-star"></span>
+        </button>
+  <!-- <div class="checkbox">
+    <label>
+      Off
+      <input id = "btn"  type="checkbox" name="button" class=" btn btn-default"></input>
+      <span class="lever"></span>
+      On
+    </label>
+  </div> -->
     </div>
+    <button class="btn btn-default btn-dropdown pull-right">
+  <span class="icon icon-megaphone"></span>
+</button>
+    </div>
+</header>
 
-    <h4 class="changeit center"> Recently Copied: </h4>
-    <ul class= "copied-list collection"id="clipboard">
+    <div class="window-content">
+<div class="pane-group">
+    <!-- <ul class="changeit" id="todo">
+
+    </ul> -->
+
+
+<!-- <h2 class="changeit">Clipboard</h1> -->
+
+    <h4 class="changeit">  </h4>
+    <ul class= "copied-list collection list-group"id="clipboard">
+      <li class="list-group-header">Recently Copied:</li>
 
     </ul>
-    <h4 class="changeit center"> Favorites: </h4>
-    <ul class="collection" id="favorites">
+    <div id="favoritePanel" class="pane-sm sidebar hidden">
+    <nav class="nav-group">
 
+    <h4 class="changeit center nav-group-title"> Favorites: </h4>
+
+    <ul class="collection list-group" id="favorites">
+      <li class="list-group-header">
+        <form>
+        <input class="form-control" type="text" placeholder="Search for a Fave">
+        <button class='btn btn-default' type='submit'>Submit</button>
+      </form>
+        <ul class='resultsList'>
+
+        </ul>
+      </li>
     </ul>
+  </nav>
+</div>
+</div>
+  </div>
   </div>
     <!-- You can also require other files to run in this process -->
     <script src="./renderer.js"></script>
@@ -59,21 +94,50 @@
       }
 
 //Toggle On and Off for CSS
-      btn.addEventListener('click', function() {
-        const text = document.querySelectorAll('.changeit');
-        if(this.checked) {
-          window.api.clipIt();
-          background.style.background = '#2E3E50';
-          text.forEach(item => changeFontColor(item));
-        }else{
-          window.api.turnOffClip();
-          background.style.background = 'white';
-          text.forEach(item => changeFontColorDark(item));
-        }
-        // canListenForCopy == true ? window.api.clipIt() : window.api.turnOffClip();
-        // canListenForCopy = !canListenForCopy;
-      });
+      // btn.addEventListener('click', function() {
+      //   const text = document.querySelectorAll('.changeit');
+      //   if(this.checked) {
+      //     window.api.clipIt();
+      //     background.style.background = '#2E3E50';
+      //     text.forEach(item => changeFontColor(item));
+      //   }else{
+      //     window.api.turnOffClip();
+      //     background.style.background = 'white';
+      //     text.forEach(item => changeFontColorDark(item));
+      //   }
+      //   // canListenForCopy == true ? window.api.clipIt() : window.api.turnOffClip();
+      //   // canListenForCopy = !canListenForCopy;
+      // });
+      const listenerButton = document.querySelector('#listen');
+      const faveButton = document.querySelector('#faveToggler');
+      const favePanel = document.querySelector('#favoritePanel');
+      const menuButtons = document.querySelectorAll('.btn');
+      const form = document.querySelector('.form-control');
+      let listeningButtonActive = 0;
+      menuButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          button.classList.toggle('active')
+        //   menuButtonsActive = !menuButtonsActive;
+        //   if(menuButtonsActive){
+        //   button.classList.add('active');
+        // }else{
+        //   button.classList.remove('active');
+        // }
+        })
+      })
 
+      listenerButton.addEventListener('click', function(){
+        listeningButtonActive = !listeningButtonActive;
+        listeningButtonActive ? window.api.clipIt() : window.api.turnOffClip();
+      })
+      faveButton.addEventListener('click', () => {
+        favePanel.classList.toggle('hidden');
+      })
+
+      form.addEventListener('input', e => {
+        e.preventDefault
+        window.api.searchForItem(e.target.value);
+      })
       /*
       1
       2
@@ -85,9 +149,11 @@
       pee pee
       */
       window.api.loadFavorites();
+      window.api.searchArray();
       window.api.listenForCopy();
       window.api.addToFavorites();
       window.api.deleteRenderFromFavorites();
+      window.api.arraySearched();
     </script>
   </body>
 </html>

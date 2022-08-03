@@ -4,7 +4,7 @@
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "set NODE_ENV=development&&electron ."
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -17,13 +17,16 @@
   "author": "GitHub",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^13.1.5"
+    "electron": "^13.1.5",
+    "electron-reloader": "^1.2.1"
   },
   "dependencies": {
+    "dotenv": "^16.0.1",
     "electron-clipboard-extended": "^1.1.1",
     "electron-reload": "^2.0.0-alpha.1",
+    "fuse.js": "^6.4.6",
     "mysql": "^2.18.1",
     "mysql2": "^2.2.5",
-    "nodemon": "^2.0.12"
+    "nodemon": "^2.0.19"
   }
 }

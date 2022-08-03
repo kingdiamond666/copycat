@@ -14,6 +14,8 @@ console.log('hello from the preload script')
 const electron = require('electron');
 const {ipcRenderer, clipboard, contextBridge} = electron;
 const clipBoardListener = require('electron-clipboard-extended');
+const Fuse = require('fuse.js');
+let favoritesList = [];
 contextBridge.exposeInMainWorld("api", {
   submitIt:(item) => {
       ipcRenderer.send('item:add', item);
@@ -45,30 +47,33 @@ contextBridge.exposeInMainWorld("api", {
         console.log('text already copied brah');
       }else{
         const ul = document.querySelector('#clipboard');
+        const div = document.createElement('div');
         const li = document.createElement('li');
         const favIcon = document.createElement('span');
         const displayCopiedText = document.createElement('span');
         const copyItemText = document.createTextNode(text);
-        displayCopiedText.classList.add('regular-copied-item')
+        displayCopiedText.classList.add('list-group-item');
+        div.classList.add('media-body');
         displayCopiedText.appendChild(copyItemText);
         li.appendChild(displayCopiedText);
         // li.classList.add('copied-list-item','collection-item','changeit');
-        li.classList.add('copied-list-item','collection-item');
+        li.classList.add('copied-list-item','collection-item','list-group-item');
         favIcon.classList.add('secondary-content');
-        favIcon.innerHTML += '<i class="material-icons">favorite_border</i>'
+        favIcon.innerHTML += '<i class="material-icons pull-right">favorite_border</i>'
         li.appendChild(favIcon);
+        div.appendChild(li)
         displayCopiedText.addEventListener('click',(e) => {
           clipBoardListener.writeText(displayCopiedText.innerText);
           new Notification('Item Copied',{body: `You Just Copied \"${displayCopiedText.innerText}\"`})
         })
         favIcon.addEventListener('click', (e) => {
           ipcRenderer.send('item:add-to-db', text);
-          favIcon.innerHTML = '<i class="material-icons">favorite</i>'
+          favIcon.innerHTML = '<i class="material-icons pull-right">favorite</i>'
           new Notification('Item Added To Favorites', {body:`${text} added to favorites`})
           console.log('item submitted to database');
         })
         // canListenForCopy ? li.classList.add('changeit', 'font-engaged') : li.classList.add('changeit');
-        ul.appendChild(li);
+        ul.appendChild(div);
        textOnClipBoard.push(text);
       }
     })
@@ -85,10 +90,11 @@ contextBridge.exposeInMainWorld("api", {
         displayCopiedText.appendChild(copyItemText);
         li.appendChild(displayCopiedText);
         // li.classList.add('copied-list-item','collection-item','changeit');
-        li.classList.add('copied-list-item','collection-item', 'favorite-list-item');
+        li.classList.add('copied-list-item','collection-item', 'favorite-list-item' , 'list-group-item');
         favIcon2.classList.add('secondary-content');
-        favIcon2.innerHTML += '<i class="material-icons">favorite</i>'
+        favIcon2.innerHTML += '<i class="material-icons pull-right">favorite</i>'
         li.appendChild(favIcon2);
+        favoritesList.push(text);
         displayCopiedText.addEventListener('click',(e) => {
           clipBoardListener.writeText(displayCopiedText.innerText);
           new Notification('Item Copied',{body: `You Just Copied \"${displayCopiedText.innerText}\"`})
@@ -131,7 +137,7 @@ contextBridge.exposeInMainWorld("api", {
        const favorites = document.getElementById('favorites');
 
       results.forEach(text => {
-        console.log(text)
+        // console.log(text)
         const li = document.createElement('li');
         const favIcon2 = document.createElement('span');
         const displayCopiedText = document.createElement('span');
@@ -140,9 +146,9 @@ contextBridge.exposeInMainWorld("api", {
         displayCopiedText.appendChild(copyItemText);
         li.appendChild(displayCopiedText);
         // li.classList.add('copied-list-item','collection-item','changeit');
-        li.classList.add('copied-list-item','collection-item', 'favorite-list-item');
+        li.classList.add('copied-list-item','collection-item', 'favorite-list-item', 'list-group-item');
         favIcon2.classList.add('secondary-content');
-        favIcon2.innerHTML += '<i class="material-icons">favorite</i>'
+        favIcon2.innerHTML += '<i class="material-icons pull-right">favorite</i>'
         li.appendChild(favIcon2);
         displayCopiedText.addEventListener('click',(e) => {
           clipBoardListener.writeText(displayCopiedText.innerText);
@@ -150,7 +156,7 @@ contextBridge.exposeInMainWorld("api", {
         })
         favIcon2.addEventListener('click', (e) => {
           ipcRenderer.send('item:delete-from-db', text);
-          favIcon2.innerHTML = '<i class="material-icons">favorite_border</i>'
+          favIcon2.innerHTML = '<i class="material-icons pull-right">favorite_border</i>'
           console.log('delete request submitted to database');
         })
         // canListenForCopy ? li.classList.add('changeit', 'font-engaged') : li.classList.add('changeit');
@@ -158,8 +164,54 @@ contextBridge.exposeInMainWorld("api", {
       })
 
     })
+  },
+  searchArray: () => {
+    ipcRenderer.on('sendSearchableArray', function(e, favoritesArray){
+      const newfavoritesArray = favoritesArray;
+      favoritesList = newfavoritesArray
+      console.log(newfavoritesArray)
+    })
+  },
+  searchForItem: (text) => {
+    ipcRenderer.send('item:searchedFor', text)
+  },
+  arraySearched: (text) => {
+    ipcRenderer.on('arrayBeingSearched', function(e, text){
+      const fuse = new Fuse(favoritesList)
+      const options = {
+        shouldSort: true,
+        isCaseSensitive: false,
+      }
+      const result = fuse.search(text, options)
+      let resultsField = document.querySelector('.resultsList')
+      let listifiedResults = []
+      let currentResults = []
+      result.forEach(item => {
+        listifiedResults.push(`<li>${item.item}</li>`)
+      })
+      resultsField.innerHTML = listifiedResults.join(' ');
+// TODO: Take an array of the current favorites so you can compare that against your listifiedResults
+// and then you can mark the class of each item that isn't in the results as "hidden" thus hiding any items
+//from the list that aren't in the search results.
+      const favoriteNodes = Array.from(document.querySelectorAll('.copied-list-item'));
+      favoriteNodes.forEach(favorite => {
+        currentResults.push(favorite.textContent)
+        console.log(currentResults)
+      })
+      // result.forEach(item => resultsField.innerHTML = `<li>${item.item}</li>`)
+      // result.forEach(item => {
+      //   let resultsField = document.querySelector('.resultsList')
+      //   resultsField.innerHTML =
+      //   let li = document.createElement('li')
+      //   let searchResult = document.createTextNode(item.item);
+      //   li.appendChild(searchResult);
+      //   resultsField.appendChild(li);
+      //
+      // })
+    })
   }
 })
+
 let canListenForCopy = false;
 let textOnClipBoard = []
 // const {

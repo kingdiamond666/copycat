@@ -1,14 +1,24 @@
 // Modules to control application life and create native browser window
+require("dotenv").config
 const {app, BrowserWindow, Menu, ipcMain, Tray, dialog} = require('electron')
 const electronReload = require('electron-reload')
 const url = require('url')
 const path = require('path')
+const Fuse = require('fuse.js')
 const mysql = require('mysql2');
+const env = process.env.NODE_ENV || 'development';
+if (env === 'development') {
+    require('electron-reload')(__dirname, {
+        electron: path.join(__dirname, 'node_modules', '.bin', 'electron'),
+        hardResetMethod: 'exit'
+    });
+}
+
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'Kettlebell1601!',
-  database: 'copy_cat_app'
+  password: process.env.SQLPASSWORD,
+  database: process.env.DBNAME
 })
 
 
@@ -19,6 +29,9 @@ function createWindow () {
    mainWindow = new BrowserWindow({
     width: 300,
     height: 500,
+    y: 2000,
+    x: 0,
+    frame: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     }
@@ -42,7 +55,9 @@ function createWindow () {
   tray.setToolTip('This is my app');
   tray.setContextMenu(contextMenu);
 }
+
 // Load DB Items into favorites
+let favoritesArray = [];
 function loadFavorites(){
   connection.connect(function(err){
     if(err) throw err;
@@ -50,10 +65,21 @@ function loadFavorites(){
     connection.query(sql, function(err, result){
       if(err) throw err;
       console.log(result);
+      result.forEach(oneResult => {
+        favoritesArray.push(oneResult.item_copied);
+      })
+      console.log(favoritesArray)
       mainWindow.webContents.send('loadFavorites', result);
+      mainWindow.webContents.send('sendSearchableArray', favoritesArray)
     })
   })
 }
+
+// Handle search
+ipcMain.on('item:searchedFor', function(e, text){
+  console.log(`search being conducted for: ${text}`)
+  mainWindow.webContents.send('arrayBeingSearched', text)
+})
 //Catch item:add
 ipcMain.on('item:add', function(e, item){
   console.log(item);
@@ -190,7 +216,9 @@ app.whenReady().then(() => {
   mainWindow.once('ready-to-show', () => {
     loadFavorites();
   })
-
+  mainWindow.on('reload', () => {
+    loadFavorites();
+  })
   mainWindow.on('closed', function(){
     app.quit();
   })

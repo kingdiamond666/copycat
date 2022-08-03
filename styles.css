@@ -59,7 +59,7 @@ input:checked + .slider:before {
 
 .slider.round:before {
   border-radius: 50%;
-} */ 
+} */
 .body-background{
   background: #2E3E50;
 }
@@ -73,4 +73,11 @@ input:checked + .slider:before {
 }
 .copied-list-item{
 
+}
+.hidden{
+  visibility: hidden;
+}
+.btn {
+  -webkit-transition: .4s;
+  transition: .4s;
 }
